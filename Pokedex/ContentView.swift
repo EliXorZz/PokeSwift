@@ -15,29 +15,31 @@ struct ContentView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
         animation: .default)
     private var items: FetchedResults<Item>
-    
-    @State private var pokemons: [Pokemon] = []
-    
+
     var body: some View {
-        VStack {
-                ForEach(pokemons) { pokemon in
+        NavigationView {
+            List {
+                ForEach(items) { item in
                     NavigationLink {
-                        Text(pokemon.imageURL)
+                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
                     } label: {
-                        Text(pokemon.name)
+                        Text(item.timestamp!, formatter: itemFormatter)
                     }
                 }
                 .onDelete(perform: deleteItems)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
                 }
-                .task {
-                    // Mettre le code asynchrone dans .task
-                    if let fetchedPokemons = try? await fetchPokemon() {
-                        self.pokemons = fetchedPokemons
-                        print("Fetched \(pokemons.count) favorites.")
-                    } else {
-                        print("Failed to fetch favorites.")
+                ToolbarItem {
+                    Button(action: addItem) {
+                        Label("Add Item", systemImage: "plus")
                     }
                 }
+            }
+            Text("Select an item")
+        }
     }
 
     private func addItem() {
