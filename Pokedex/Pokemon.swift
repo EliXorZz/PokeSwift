@@ -7,9 +7,17 @@
 
 import SwiftUI
 
-struct Pokemon {
+struct Pokemon: Decodable, Identifiable {
+    let id: Int
     let name: String
     let imageURL: String
-    let types: [String]
-    let stats: [String: Int]
+    //let types: [String]
+    //let stats: [String: Int]
+}
+
+func fetchPokemon() async throws -> [Pokemon] {
+    let url = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=10&offset=0")!
+    let (data, _) = try await URLSession.shared.data(from: url)
+    print(data)
+    return try JSONDecoder().decode([Pokemon].self, from: data)
 }
