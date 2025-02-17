@@ -25,9 +25,11 @@ class PokemonDataManager {
     func savePokemon(_ pokemon: Pokemon) {
         let context = container.viewContext
         let newData = PokemonEntity(context: context)
+        
         newData.id = Int64(pokemon.id)
         newData.name = pokemon.name + "h"
         newData.image = pokemon.image
+        
         do {
             try context.save()
         } catch {
@@ -37,15 +39,15 @@ class PokemonDataManager {
     
     
     func fetchPokemons() -> [Pokemon] {
-            let context = container.viewContext
-            let request = NSFetchRequest<PokemonEntity>(entityName: "PokemonEntity")
-            
-            do {
-                let entities = try context.fetch(request)
-                return entities.map { Pokemon(id: Int($0.id), name: $0.name ?? "", image: $0.image ?? "") }
-            } catch {
-                print("Erreur lecture: \(error)")
-                return []
-            }
+        let context = container.viewContext
+        let request = NSFetchRequest<PokemonEntity>(entityName: "PokemonEntity")
+        
+        do {
+            let entities = try context.fetch(request)
+            return entities.map { Pokemon(id: Int($0.id), name: $0.name!, image: $0.image!, types: [] ) }
+        } catch {
+            print("Erreur lecture: \(error)")
+            return []
         }
+    }
 }

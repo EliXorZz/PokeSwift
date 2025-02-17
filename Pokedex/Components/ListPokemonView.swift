@@ -15,11 +15,12 @@ struct ListPokemonView: View {
             VStack {
                 if let pokemon = viewModel.pokemons[item.name] {
                     HStack {
-                        AsyncImage(url: pokemon.image()) { image in
+                        AsyncImage(url: pokemon.image) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 50, height: 50)
+                            
                         } placeholder: {
                             ProgressView()
                         }

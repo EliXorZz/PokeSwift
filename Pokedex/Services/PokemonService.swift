@@ -7,29 +7,6 @@
 
 import SwiftUI
 
-enum PokemonType: String {
-    case normal
-    case fighting
-    case flying
-    case poison
-    case ground
-    case rock
-    case bug
-    case ghost
-    case steel
-    case fire
-    case water
-    case grass
-    case electric
-    case psychic
-    case ice
-    case dragon
-    case dark
-    case fairy
-    case stellar
-    case unknown
-}
-
 struct PokemonList: Codable {
     let next: String?
     let previous: String?
@@ -52,21 +29,11 @@ struct PokemonList: Codable {
     }
 }
 
-struct Pokemon: Codable, Identifiable {
+struct PokemonAPI: Codable, Identifiable {
     let id: Int
     let name: String
     
-    //let stats: Stats
     let sprites: Sprites
-    
-    struct Stats: Codable {
-        let baseStat: Int
-        let stat: Data
-        
-        struct Data: Codable {
-            let name: String
-        }
-    }
     
     struct Sprites: Codable {
         let other: Other
@@ -82,10 +49,6 @@ struct Pokemon: Codable, Identifiable {
                 case official = "official-artwork"
             }
         }
-    }
-    
-    func image() -> URL {
-        return URL(string: self.sprites.other.official.frontDefault)!
     }
 }
 
@@ -115,7 +78,15 @@ class PokemonService {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
-        return try decoder.decode(Pokemon.self, from: data)
+        let pokemonAPI = try decoder.decode(PokemonAPI.self, from: data)
+        
+        return Pokemon(
+            id: pokemonAPI.id,
+            name: pokemonAPI.name,
+            image: URL(string: pokemonAPI.sprites.other.official.frontDefault)!,
+            
+            types: []
+        )
     }
 
 }
