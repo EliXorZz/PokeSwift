@@ -8,9 +8,12 @@
 import SwiftUI
 
 struct ListPokemonView: View {
-    @State private var pokemons: [Pokemon] = [
-        Pokemon(id: 1, name: "Pikachu", imageURL: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png")
-    ]
+    @Environment(\.managedObjectContext) private var viewContext
+
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.id, ascending: true)],
+        animation: .default)
+    private var pokemons: FetchedResults<PokemonEntity>
     
     var body: some View {
         List {
@@ -18,7 +21,7 @@ struct ListPokemonView: View {
                 ForEach(pokemons) { pokemon in
                     
                     HStack {
-                        AsyncImage(url: URL(string: pokemon.imageURL)) { image in
+                        AsyncImage(url: URL(string: pokemon.image ?? "")) { image in
                                             image
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fit)
@@ -26,7 +29,7 @@ struct ListPokemonView: View {
                                         } placeholder: {
                                             ProgressView()
                                         }
-                            Text(pokemon.name)
+                            Text(pokemon.name ?? "")
                             }
                 }
                 .task {

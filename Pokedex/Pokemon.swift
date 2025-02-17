@@ -10,7 +10,7 @@ import SwiftUI
 struct Pokemon: Decodable, Identifiable {
     let id: Int
     let name: String
-    let imageURL: String
+    let image: String
     //let types: [String]
     //let stats: [String: Int]
 }

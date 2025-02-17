@@ -16,6 +16,7 @@ struct PokedexApp: App {
     var body: some Scene {
         WindowGroup {
             ListPokemonView()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
             /*
              ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
