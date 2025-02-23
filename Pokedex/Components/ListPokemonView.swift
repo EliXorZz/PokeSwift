@@ -8,13 +8,6 @@
 import SwiftUI
 
 struct ListPokemonView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.id, ascending: true)],
-        animation: .default)
-    private var pokemons: FetchedResults<PokemonEntity>
-    
     @StateObject private var viewModel = PokemonListViewModel()
     
     var body: some View {

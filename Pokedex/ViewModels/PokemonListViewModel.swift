@@ -6,8 +6,12 @@
 //
 
 import Foundation
+import CoreData
 
 class PokemonListViewModel: ObservableObject {
+    
+    
+    
     @Published var pokemonItems: [PokemonList.Item] = []
     @Published var pokemons: [String:Pokemon] = [:]
     
