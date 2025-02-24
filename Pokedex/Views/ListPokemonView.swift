@@ -10,6 +10,7 @@ import Kingfisher
 
 struct ListPokemonView: View {
     @StateObject private var viewModel = PokemonListViewModel()
+    private let notificationManager = NotificationManager()
     
     let columns = [
         GridItem(.flexible()),
@@ -31,7 +32,7 @@ struct ListPokemonView: View {
             }
             .padding()
         }
-        .navigationBarTitle("Pokemon Collection")
+        .navigationBarTitle("Collection pokémon")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -72,6 +73,11 @@ struct ListPokemonView: View {
         }
         .task {
             await viewModel.loadPokemons()
+            
+            if let pokemon = viewModel.pokemons.first {
+                notificationManager.requestPermission()
+                notificationManager.scheduleDailyPokemonNotification(pokemon: pokemon)
+            }
         }
         .searchable(text: $viewModel.searchQuery, prompt: "Rechercher un pokémon")
     }
