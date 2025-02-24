@@ -9,48 +9,41 @@ import SwiftUI
 
 struct ListPokemonView: View {
     @StateObject private var viewModel = PokemonListViewModel()
+    
     @State var pokemonDetailOpen: Bool = false
     @State var pokemonToShow: Pokemon? = nil
     
+    let columns = [
+            GridItem(.flexible()),
+            GridItem(.flexible())
+        ]
+
     var body: some View {
-        NavigationStack {
-            List(viewModel.pokemonItems) { item in
-                VStack {
-                    if let pokemon = viewModel.pokemons[item.name] {
-                        HStack {
-                            AsyncImage(url: pokemon.image) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 50, height: 50)
-                                
-                            } placeholder: {
-                                ProgressView()
-                            }
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(viewModel.pokemons) { pokemon in
+                    HStack {
+                        AsyncImage(url: pokemon.image) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 50, height: 50)
                             
-                            Text(pokemon.name)
-                        }
-                        .onTapGesture {
-                            pokemonToShow = pokemon
-                            pokemonDetailOpen.toggle()
+                        } placeholder: {
+                            ProgressView()
                         }
                         
-                    }else {
-                        ProgressView()
+                        Text(pokemon.name)
+                    }
+                    .onTapGesture {
+                        pokemonToShow = pokemon
+                        pokemonDetailOpen.toggle()
                     }
                 }
-                .task {
-                    await viewModel.loadPokemon(name: item.name)
-                }
-            }.task {
-                await viewModel.loadPokemons()
             }
-            .navigationBarTitle("Pokemon Collection")
-            .sheet(isPresented: $pokemonDetailOpen, content: {
-                    if let pokemon = pokemonToShow {
-                        PokemonDetailView(pokemon: pokemon)
-                    }
-                })
+            .padding()
+        }.task {
+            await viewModel.loadPokemons()
         }
     }
 }

@@ -9,38 +9,23 @@ import Foundation
 import CoreData
 
 class PokemonListViewModel: ObservableObject {
+    @Published var pokemons: [Pokemon] = []
     
+    private let pokemonRepository = PokemonRepository()
     
-    
-    @Published var pokemonItems: [PokemonList.Item] = []
-    @Published var pokemons: [String:Pokemon] = [:]
-    @Published var pokemonFavorite: [Int] = []
-    
-    private let sizePage = 20
-    private var offsetPage = 0
+    private let limit = 20
+    private let currentPage = 0
     
     func loadPokemons() async {
         do {
-            let pokemonList = try await PokemonService.fetchPokemonList(limit: sizePage, offset: offsetPage)
+            let pokemons = try await pokemonRepository.getPokemons(limit: limit, page: currentPage)
             
             await MainActor.run {
-                self.offsetPage += self.sizePage
-                self.pokemonItems += pokemonList.results
+                self.pokemons = pokemons
             }
         }catch {
             print("Une erreur est survenue: \(error)")
-        }
-    }
-    
-    func loadPokemon(name: String) async {
-        do {
-            let newPokemon = try await PokemonService.fetchPokemon(name: name)
-            
-            await MainActor.run {
-                self.pokemons[name] = newPokemon
-            }
-        }catch {
-            print("Une erreur est survenue: \(error)")
+            dump(error)
         }
     }
 }

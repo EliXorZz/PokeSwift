@@ -72,9 +72,9 @@ struct PokemonDetailView: View {
                 // Stats
                 VStack(spacing: 15) {
                     StatGroup(name: "HP", value: pokemon.hp, color: .green)
-                    StatGroup(name: "Attack", value: pokemon.strength, color: .red)
-                    StatGroup(name: "Defense", value: pokemon.defense, color: .blue)
-                    StatGroup(name: "Speed", value: pokemon.speed, color: .orange)
+                    //StatGroup(name: "Attack", value: pokemon.strength, color: .red)
+                    //StatGroup(name: "Defense", value: pokemon.defense, color: .blue)
+                    //StatGroup(name: "Speed", value: pokemon.speed, color: .orange)
                 }
                 .padding()
                 .background(.ultraThinMaterial)
@@ -155,7 +155,7 @@ struct StatBar: View {
 }
 
 #Preview {
-    PokemonDetailView(pokemon: Pokemon(
+    /*PokemonDetailView(pokemon: Pokemon(
         id: 1,
         name: "Bulbasaur",
         image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png")!,
@@ -164,5 +164,5 @@ struct StatBar: View {
         strength: 40,
         defense: 40,
         speed: 60
-    ))
+    ))*/
 }
