@@ -6,32 +6,22 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct ListPokemonView: View {
     @StateObject private var viewModel = PokemonListViewModel()
     
     var body: some View {
-        List(viewModel.pokemonItems) { item in
+        List(viewModel.pokemons) { pokemon in
             VStack {
-                if let pokemon = viewModel.pokemons[item.name] {
-                    HStack {
-                        AsyncImage(url: pokemon.image) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 50, height: 50)
-                            
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        
-                        Text(pokemon.name)
-                    }
-                }else {
-                    ProgressView()
+                HStack {
+                    KFImage(pokemon.image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 50, height: 50)
+                    
+                    Text(pokemon.name)
                 }
-            }.task {
-                await viewModel.loadPokemon(name: item.name)
             }
         }.task {
             await viewModel.loadPokemons()
