@@ -21,7 +21,7 @@ struct ListPokemonView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.filteredPokemons) { pokemon in
-                    PokemonCard(pokemon: pokemon)
+                    PokemonCard(pokemon: pokemon, viewModel: viewModel)
                         .task {
                             if (pokemon.id == viewModel.filteredPokemons.last?.id) {
                                 await viewModel.loadPokemons()
@@ -83,8 +83,11 @@ struct ListPokemonView: View {
     }
 }
 
+    
 struct PokemonCard: View {
     let pokemon: Pokemon
+    let viewModel: PokemonListViewModel
+    @State private var isClicked = false
     
     var body: some View {
         VStack {
@@ -99,14 +102,40 @@ struct PokemonCard: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 100, height: 100)
+                .saturation(isClicked ? 0.5 : 1.0) // Réduire la saturation lors du clic
         }
         .frame(maxWidth: .infinity)
         .frame(height: 180)
         .background(
-            LinearGradient(gradient: Gradient(colors: [pokemon.types.first?.color ?? .white, .white]), startPoint: .top, endPoint: .bottom)
+            LinearGradient(
+                gradient: Gradient(
+                    colors: [
+                        isClicked ? (pokemon.types.first?.color.opacity(0.6) ?? .gray) : (pokemon.types.first?.color ?? .white),
+                        isClicked ? .gray.opacity(0.7) : .white
+                    ]
+                ),
+                startPoint: .top,
+                endPoint: .bottom
+            )
         )
         .cornerRadius(10)
         .shadow(radius: 3)
+        .onTapGesture {
+            // Effet grisâtre
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isClicked = true
+            }
+            
+            // Rétablir après un court délai
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isClicked = false
+                }
+                
+                // Exécuter l'action originale après l'animation
+                viewModel.pokemonToShow = pokemon
+            }
+        }
     }
 }
 
