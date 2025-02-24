@@ -14,14 +14,15 @@ class PokemonListViewModel: ObservableObject {
     private let pokemonRepository = PokemonRepository()
     
     private let limit = 20
-    private let currentPage = 0
+    private var currentPage = 0
     
     func loadPokemons() async {
         do {
             let pokemons = try await pokemonRepository.getPokemons(limit: limit, page: currentPage)
             
             await MainActor.run {
-                self.pokemons = pokemons
+                self.pokemons += pokemons
+                self.currentPage += 1
             }
         }catch {
             print("Une erreur est survenue: \(error)")

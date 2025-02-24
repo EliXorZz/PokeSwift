@@ -6,43 +6,51 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct ListPokemonView: View {
     @StateObject private var viewModel = PokemonListViewModel()
     
-    @State var pokemonDetailOpen: Bool = false
     @State var pokemonToShow: Pokemon? = nil
+    @State var showSheet = false
     
     let columns = [
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ]
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
 
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.pokemons) { pokemon in
                     HStack {
-                        AsyncImage(url: pokemon.image) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 50, height: 50)
-                            
-                        } placeholder: {
-                            ProgressView()
-                        }
+                        KFImage(pokemon.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 50, height: 50)
                         
                         Text(pokemon.name)
                     }
+                    .task {
+                        if (pokemon.id == viewModel.pokemons.last?.id) {
+                            await viewModel.loadPokemons()
+                        }
+                    }
                     .onTapGesture {
                         pokemonToShow = pokemon
-                        pokemonDetailOpen.toggle()
+                        showSheet.toggle()
                     }
                 }
             }
             .padding()
-        }.task {
+        }
+        .navigationBarTitle("Pokemon Collection")
+        .sheet(isPresented: $showSheet, content: {
+            if let pokemon = pokemonToShow {
+                PokemonDetailView(pokemon: pokemon)
+            }
+        })
+        .task {
             await viewModel.loadPokemons()
         }
     }
