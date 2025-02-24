@@ -106,10 +106,10 @@ struct PokemonFightView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             showingAttackAnimation = false
             if currentTurn == 1 {
-                pokemon2HP = max(0, pokemon2HP - pokemon.strength)
+                pokemon2HP = max(0, pokemon2HP - (pokemon.stats[PokemonStatsType.attack] ?? 0))
                 currentTurn = 2
             } else {
-                pokemon1HP = max(0, pokemon1HP - randomPokemon.strength)
+                pokemon1HP = max(0, pokemon1HP - (randomPokemon.stats[PokemonStatsType.attack] ?? 0))
                 currentTurn = 1
             }
         }

@@ -73,9 +73,9 @@ struct PokemonDetailView: View {
                 // Stats
                 VStack(spacing: 15) {
                     StatGroup(name: "HP", value: pokemon.hp, color: .green)
-                    StatGroup(name: "Attack", value: pokemon.stats[.attack], color: .red)
-                    StatGroup(name: "Defense", value: pokemon.stats[.defense], color: .blue)
-                    StatGroup(name: "Speed", value: pokemon.stats[.speed], color: .orange)
+                    StatGroup(name: "Attack", value: pokemon.stats[PokemonStatsType.attack] ?? 0, color: .red)
+                    StatGroup(name: "Defense", value: pokemon.stats[PokemonStatsType.defense] ?? 0, color: .blue)
+                    StatGroup(name: "Speed", value: pokemon.stats[PokemonStatsType.speed] ?? 0, color: .orange)
 
                 }
                 .padding()
