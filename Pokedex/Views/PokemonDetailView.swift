@@ -11,6 +11,7 @@ struct PokemonDetailView: View {
     let pokemon: Pokemon
     @Environment(\.dismiss) private var dismiss
     @State private var isFavorite = false
+    @State private var showingFightView = false
     
     private var backgroundColor: Color {
         pokemon.types.first?.color.opacity(0.2) ?? .clear
@@ -81,10 +82,10 @@ struct PokemonDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding(.horizontal)
                 
+                
                 // Bouton Combat
                 Button(action: {
-                    // Action pour commencer le combat
-                    print("Combat started!")
+                    showingFightView = true
                 }) {
                     Text("Commencer le combat")
                         .font(.headline)
@@ -104,6 +105,21 @@ struct PokemonDetailView: View {
                 .padding(.top, 20)
             }
             .padding(.vertical)
+            .sheet(isPresented: $showingFightView) {
+                        PokemonFightView(
+                            pokemon: pokemon,
+                            randomPokemon: Pokemon(
+                                id: 2,
+                                name: "Bulbasaur",
+                                image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/50.png")!,
+                                types: [.bug, .fighting],
+                                hp: 70,
+                                strength: 20,
+                                defense: 50,
+                                speed: 30
+                            )
+                        )
+                    }
         }
         .background(backgroundColor)
         .navigationBarHidden(true)
