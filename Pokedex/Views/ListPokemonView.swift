@@ -46,15 +46,6 @@ struct ListPokemonView: View {
                 await viewModel.loadPokemons()
             }
             .navigationBarTitle("Pokemon Collection")
-            .toolbar(content: {
-                ToolbarItem(placement: ToolbarItemPlacement.automatic) {
-                    Button(action: {
-                        pokemonDetailOpen.toggle()
-                    }, label: {
-                        Image(systemName: "plus.circle.fill")
-                    })
-                }
-            })
             .sheet(isPresented: $pokemonDetailOpen, content: {
                     if let pokemon = pokemonToShow {
                         PokemonDetailView(pokemon: pokemon)

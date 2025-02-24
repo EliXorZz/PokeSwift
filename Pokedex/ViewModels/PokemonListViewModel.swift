@@ -14,6 +14,7 @@ class PokemonListViewModel: ObservableObject {
     
     @Published var pokemonItems: [PokemonList.Item] = []
     @Published var pokemons: [String:Pokemon] = [:]
+    @Published var pokemonFavorite: [Int] = []
     
     private let sizePage = 20
     private var offsetPage = 0
