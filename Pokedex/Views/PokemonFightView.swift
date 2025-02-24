@@ -159,9 +159,12 @@ struct PokemonStatusView: View {
         image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png")!,
         types: [.dark, .fire],  // Simplification de la syntaxe pour les types
         hp: 50,
-        strength: 40,
-        defense: 40,
-        speed: 60
+        stats : [
+            .hp: 70,
+            .attack: 40,
+            .defense: 40,
+            .speed: 60
+        ]
     ),
      randomPokemon: Pokemon(
         id: 2,
@@ -169,8 +172,11 @@ struct PokemonStatusView: View {
         image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/50.png")!,
         types: [.bug, .fighting],  // Simplification de la syntaxe pour les types
         hp: 70,
-        strength: 20,
-        defense: 50,
-        speed: 30
+        stats : [
+            .hp: 70,
+            .attack: 20,
+            .defense: 50,
+            .speed: 30
+        ]
     ))
 }
