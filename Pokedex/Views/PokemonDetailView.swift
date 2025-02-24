@@ -8,10 +8,9 @@
 import SwiftUI
 
 struct PokemonDetailView: View {
-    @StateObject private var viewModel = PokemonDetailViewModel()
     let pokemon: Pokemon
+    @StateObject private var viewModel = PokemonDetailViewModel()
     @Environment(\.dismiss) private var dismiss
-    
     
     private var backgroundColor: Color {
         return pokemon.types.first?.color.opacity(0.2) ?? .clear
@@ -87,9 +86,6 @@ struct PokemonDetailView: View {
                 // Bouton Combat
                 Button(action: {
                     viewModel.showingFightView = true
-                    Task {
-                        await viewModel.loadRandomPokemon()
-                    }
                 }) {
                     Text("Commencer le combat")
                         .font(.headline)
@@ -109,16 +105,7 @@ struct PokemonDetailView: View {
                 .padding(.top, 20)
             }
             .padding(.vertical)
-            .sheet(isPresented: $viewModel.showingFightView) {
-                if (viewModel.randPokemon != nil) {
-                    PokemonFightView(
-                        pokemon: pokemon,
-                        randomPokemon: viewModel.randPokemon!
-                    )
-                } else {
-                    ProgressView()
-                }
-            }
+            .sheet(isPresented: $viewModel.showingFightView) { PokemonFightView(pokemon: pokemon) }
         }
         .background(backgroundColor)
         .navigationBarHidden(true)
