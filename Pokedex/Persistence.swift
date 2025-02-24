@@ -46,19 +46,20 @@ struct PersistenceController {
 }
 
 extension TypeEntity {
-    static func createOrFetch(name: String, in context: NSManagedObjectContext) -> TypeEntity? {
+    static func createOrFetch(name: String, in context: NSManagedObjectContext) -> TypeEntity {
+        // Créer une requête pour trouver si ce type existe déjà
         let fetchRequest: NSFetchRequest<TypeEntity> = TypeEntity.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "name == %@", name)
-        fetchRequest.fetchLimit = 1
-
-        // Vérifie si le type existe déjà dans Core Data
+        
+        // Essayer de trouver le type existant
         if let existingType = try? context.fetch(fetchRequest).first {
             return existingType
+        } else {
+            // Créer un nouveau type s'il n'existe pas
+            let newType = TypeEntity(context: context)
+            newType.name = name
+            // Ajouter d'autres propriétés si nécessaire
+            return newType
         }
-
-        // Si le type n'existe pas, on en crée un nouveau
-        let newType = TypeEntity(context: context)
-        newType.name = name
-        return newType
     }
 }

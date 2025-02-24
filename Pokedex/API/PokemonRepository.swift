@@ -86,8 +86,11 @@ class PokemonRepository {
                 newPokemonEntity.specialDefense = Int64(pokemon.stats[.specialDefense] ?? 0)
                 newPokemonEntity.speed = Int64(pokemon.stats[.speed] ?? 0)
 
-                // Maintenant, on ajoute tout en une seule fois
-                newPokemonEntity.types = []
+                // Ajouter les types
+                pokemon.types.forEach { typeName in
+                    let typeEntity = TypeEntity.createOrFetch(name: typeName.rawValue, in: viewContext)
+                    newPokemonEntity.addToTypes(typeEntity)  // Utilisez newPokemonEntity, pas pokemonEntity
+                }
                 
                 // Sauvegarder dans CoreData
                 try viewContext.save()
