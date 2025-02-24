@@ -37,4 +37,9 @@ struct Pokemon: Identifiable {
     let image: URL
     
     let types: [PokemonType]
+    
+    let hp: Int
+    let strength: Int
+    let defense: Int
+    let speed: Int
 }
