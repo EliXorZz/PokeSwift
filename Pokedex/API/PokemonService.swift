@@ -8,11 +8,17 @@
 import SwiftUI
 
 class PokemonService {
-    func fetchPokemonList(limit: Int, offset: Int) async throws -> PokemonListAPI {
-        let queries = [
+    func fetchPokemonList(limit: Int, offset: Int, search: String? = nil) async throws -> PokemonListAPI {
+        var queries = [
             URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "offset", value: String(offset))
         ]
+        
+        if let search = search, !search.isEmpty {
+          queries.append(
+            URLQueryItem(name: "search", value: search)
+          )
+        }
         
         var url = URL(string: "https://pokeapi.co/api/v2/pokemon")!
         

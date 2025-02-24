@@ -10,9 +10,9 @@ import Foundation
 class PokemonRepository {
     let pokemonService = PokemonService()
     
-    func getPokemons(limit: Int, page: Int) async throws -> [Pokemon] {
+    func getPokemons(limit: Int, page: Int, search: String? = nil) async throws -> [Pokemon] {
         let offset = limit * page
-        let list = try await pokemonService.fetchPokemonList(limit: limit, offset: offset)
+        let list = try await pokemonService.fetchPokemonList(limit: limit, offset: offset, search: search)
         
         return try await withThrowingTaskGroup(of: Pokemon?.self) { group in
             for result in list.results {

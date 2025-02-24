@@ -19,7 +19,7 @@ struct ListPokemonView: View {
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(viewModel.pokemons) { pokemon in
+                ForEach(viewModel.filteredPokemons) { pokemon in
                     PokemonCard(pokemon: pokemon)
                     .task {
                         if (pokemon.id == viewModel.pokemons.last?.id) {
@@ -40,6 +40,7 @@ struct ListPokemonView: View {
         .task {
             await viewModel.loadPokemons()
         }
+        .searchable(text: $viewModel.searchQuery, prompt: "Rechercher un pokémon")
     }
 }
 

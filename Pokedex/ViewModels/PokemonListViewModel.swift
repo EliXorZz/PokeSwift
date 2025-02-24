@@ -14,6 +14,19 @@ class PokemonListViewModel: ObservableObject {
     @Published var showSheet = false
     @Published var pokemonToShow: Pokemon? = nil
     
+    @Published var searchQuery = ""
+    
+    var filteredPokemons: [Pokemon] {
+        var pokemons: [Pokemon] = pokemons
+        
+        if !searchQuery.isEmpty {
+            pokemons = pokemons
+                .filter { $0.name.lowercased().contains(searchQuery.lowercased()) }
+        }
+        
+        return pokemons.sorted { $0.id < $1.id }
+    }
+    
     private let pokemonRepository = PokemonRepository()
     
     private let limit = 20
