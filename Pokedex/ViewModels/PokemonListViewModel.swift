@@ -37,4 +37,8 @@ class PokemonListViewModel: ObservableObject {
             dump(error)
         }
     }
+    
+    func toggleFav(pokemon: Pokemon){
+        
+    }
 }

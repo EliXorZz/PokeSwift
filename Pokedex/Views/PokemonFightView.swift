@@ -15,6 +15,7 @@ struct PokemonFightView: View {
     @State private var pokemon2HP: Int
     @State private var showingAttackAnimation = false
     @State private var currentTurn = 1 // 1 pour pokemon, 2 pour randomPokemon
+    @State private var finished = false
     
     init(pokemon: Pokemon, randomPokemon: Pokemon) {
         self.pokemon = pokemon
@@ -33,18 +34,14 @@ struct PokemonFightView: View {
             }
             .padding()
             
-            // Zone de combat
             ZStack {
-                // Fond
                 LinearGradient(
                     gradient: Gradient(colors: [.gray.opacity(0.2), .gray.opacity(0.1)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 
-                // Pokémon qui combattent
                 HStack(spacing: 50) {
-                    // Pokémon du joueur
                     AsyncImage(url: pokemon.image) { image in
                         image
                             .resizable()
@@ -55,7 +52,6 @@ struct PokemonFightView: View {
                         ProgressView()
                     }
                     
-                    // Pokémon adverse
                     AsyncImage(url: randomPokemon.image) { image in
                         image
                             .resizable()
@@ -69,7 +65,6 @@ struct PokemonFightView: View {
             }
             .frame(maxHeight: .infinity)
             
-            // Boutons d'action
             VStack(spacing: 15) {
                 Button("Attaquer") {
                     performAttack()
@@ -79,24 +74,43 @@ struct PokemonFightView: View {
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [pokemon.types.first?.color ?? .red, pokemon.types.last?.color ?? .red]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                    Group {
+                        if !finished {
+                            LinearGradient(
+                                gradient: Gradient(colors: [pokemon.types.first?.color ?? .red, pokemon.types.last?.color ?? .red]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        } else {
+                            Color.gray.opacity(0.5)
+                        }
+                    }
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 15))
+                .disabled(finished)
                 
-                Button("Fuir") {
-                    // Action pour fuir
+                if !finished {
+                    Button("Fuir") {
+                        // Action pour fuir
+                    }
+                    .font(.title3)
+                    .foregroundColor(.gray)
+                    
                 }
-                .font(.title3)
-                .foregroundColor(.gray)
+                else {
+                    Button("Partir") {
+                        // Action pour fuir
+                    }
+                    .font(.title3)
+                    .foregroundColor(pokemon.types.first?.color ?? .red)
+                }
             }
             .padding()
         }
         .background(Color.white)
     }
+    
+    
     
     private func performAttack() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.3, blendDuration: 0)) {
@@ -111,6 +125,9 @@ struct PokemonFightView: View {
             } else {
                 pokemon1HP = max(0, pokemon1HP - (randomPokemon.stats[PokemonStatsType.attack] ?? 0))
                 currentTurn = 1
+            }
+            if pokemon1HP == 0 || pokemon2HP == 0 {
+                finished = true
             }
         }
     }
