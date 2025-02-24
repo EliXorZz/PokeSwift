@@ -85,7 +85,12 @@ class PokemonService {
             name: pokemonAPI.name,
             image: URL(string: pokemonAPI.sprites.other.official.frontDefault)!,
             
-            types: []
+            types: [],
+            hp: 50,
+            strength: 40,
+            defense: 40,
+            speed: 60
+            
         )
     }
 

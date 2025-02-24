@@ -9,32 +9,57 @@ import SwiftUI
 
 struct ListPokemonView: View {
     @StateObject private var viewModel = PokemonListViewModel()
+    @State var pokemonDetailOpen: Bool = false
+    @State var pokemonToShow: Pokemon? = nil
     
     var body: some View {
-        List(viewModel.pokemonItems) { item in
-            VStack {
-                if let pokemon = viewModel.pokemons[item.name] {
-                    HStack {
-                        AsyncImage(url: pokemon.image) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 50, height: 50)
+        NavigationStack {
+            List(viewModel.pokemonItems) { item in
+                VStack {
+                    if let pokemon = viewModel.pokemons[item.name] {
+                        HStack {
+                            AsyncImage(url: pokemon.image) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 50, height: 50)
+                                
+                            } placeholder: {
+                                ProgressView()
+                            }
                             
-                        } placeholder: {
-                            ProgressView()
+                            Text(pokemon.name)
+                        }
+                        .onTapGesture {
+                            pokemonToShow = pokemon
+                            pokemonDetailOpen.toggle()
                         }
                         
-                        Text(pokemon.name)
+                    }else {
+                        ProgressView()
                     }
-                }else {
-                    ProgressView()
+                }
+                .task {
+                    await viewModel.loadPokemon(name: item.name)
                 }
             }.task {
-                await viewModel.loadPokemon(name: item.name)
+                await viewModel.loadPokemons()
             }
-        }.task {
-            await viewModel.loadPokemons()
+            .navigationBarTitle("Pokemon Collection")
+            .toolbar(content: {
+                ToolbarItem(placement: ToolbarItemPlacement.automatic) {
+                    Button(action: {
+                        pokemonDetailOpen.toggle()
+                    }, label: {
+                        Image(systemName: "plus.circle.fill")
+                    })
+                }
+            })
+            .sheet(isPresented: $pokemonDetailOpen, content: {
+                    if let pokemon = pokemonToShow {
+                        PokemonDetailView(pokemon: pokemon)
+                    }
+                })
         }
     }
 }
