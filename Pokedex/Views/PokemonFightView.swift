@@ -8,30 +8,70 @@
 import SwiftUI
 
 struct PokemonFightView: View {
-    let pokemon: Pokemon
-    let randomPokemon: Pokemon
     
-    @State private var pokemon1HP: Int
-    @State private var pokemon2HP: Int
-    @State private var showingAttackAnimation = false
-    @State private var currentTurn = 1 // 1 pour pokemon, 2 pour randomPokemon
+    @StateObject var viewModel : PokemonFightViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var finished = false
     
-    init(pokemon: Pokemon, randomPokemon: Pokemon) {
-        self.pokemon = pokemon
-        self.randomPokemon = randomPokemon
-        _pokemon1HP = State(initialValue: pokemon.hp)
-        _pokemon2HP = State(initialValue: randomPokemon.hp)
+    init(pokemon: Pokemon) {
+        _viewModel = StateObject(wrappedValue: PokemonFightViewModel(pokemon: pokemon))
     }
     
+    
     var body: some View {
+        Group {
+            if viewModel.randomPokemon == nil {
+                ProgressView()
+            } else {
+                FightContentView(
+                    viewModel: viewModel,
+                    performAttack: performAttack,
+                    dismiss: dismiss
+                )
+            }
+        }.onAppear {
+            Task {
+                await viewModel.load()  // Charge les données au premier affichage
+            }
+        }
+    }
+    
+    func performAttack() {
+        guard let randomPokemon = viewModel.randomPokemon else { return }
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.3, blendDuration: 0)) {
+            viewModel.showingAttackAnimation = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            viewModel.showingAttackAnimation = false
+            if viewModel.currentTurn == 1 {
+                viewModel.pokemon2HP = max(0, viewModel.pokemon2HP - (viewModel.currentPokemon!.stats[PokemonStatsType.attack] ?? 0))
+                viewModel.currentTurn = 2
+            } else {
+                viewModel.pokemon1HP = max(0, viewModel.pokemon1HP - (randomPokemon.stats[PokemonStatsType.attack] ?? 0))
+                viewModel.currentTurn = 1
+            }
+            if viewModel.pokemon1HP == 0 || viewModel.pokemon2HP == 0 {
+                viewModel.finished = true
+            }
+        }
+    }
+
+}
+    
+private struct FightContentView: View {
+    @ObservedObject var viewModel: PokemonFightViewModel
+    let performAttack: () -> Void
+    let dismiss: DismissAction
+    
+    var body: some View {
+        
         VStack {
             // En-tête avec les barres de vie
             HStack(spacing: 20) {
-                PokemonStatusView(pokemon: pokemon, currentHP: pokemon1HP)
+                PokemonStatusView(pokemon: viewModel.currentPokemon!, currentHP: viewModel.pokemon1HP)
                 Spacer()
-                PokemonStatusView(pokemon: randomPokemon, currentHP: pokemon2HP)
+                PokemonStatusView(pokemon: viewModel.randomPokemon!, currentHP: viewModel.pokemon2HP)
             }
             .padding()
             
@@ -43,22 +83,22 @@ struct PokemonFightView: View {
                 )
                 
                 HStack(spacing: 50) {
-                    AsyncImage(url: pokemon.image) { image in
+                    AsyncImage(url: viewModel.currentPokemon!.image) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 150)
-                            .offset(x: showingAttackAnimation && currentTurn == 1 ? 20 : 0)
+                            .offset(x: viewModel.showingAttackAnimation && viewModel.currentTurn == 1 ? 20 : 0)
                     } placeholder: {
                         ProgressView()
                     }
                     
-                    AsyncImage(url: randomPokemon.image) { image in
+                    AsyncImage(url: viewModel.randomPokemon!.image) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 150)
-                            .offset(x: showingAttackAnimation && currentTurn == 2 ? -20 : 0)
+                            .offset(x: viewModel.showingAttackAnimation && viewModel.currentTurn == 2 ? -20 : 0)
                     } placeholder: {
                         ProgressView()
                     }
@@ -76,9 +116,9 @@ struct PokemonFightView: View {
                 .padding()
                 .background(
                     Group {
-                        if !finished {
+                        if !viewModel.finished {
                             LinearGradient(
-                                gradient: Gradient(colors: [pokemon.types.first?.color ?? .red, pokemon.types.last?.color ?? .red]),
+                                gradient: Gradient(colors: [viewModel.currentPokemon!.types.first?.color ?? .red, viewModel.currentPokemon!.types.last?.color ?? .red]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -88,11 +128,11 @@ struct PokemonFightView: View {
                     }
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 15))
-                .disabled(finished)
+                .disabled(viewModel.finished)
                 
-                if !finished {
+                if !viewModel.finished {
                     Button("Fuir") {
-                        finished = true
+                        viewModel.finished = true
                     }
                     .font(.title3)
                     .foregroundColor(.gray)
@@ -103,37 +143,15 @@ struct PokemonFightView: View {
                         dismiss()
                     }
                     .font(.title3)
-                    .foregroundColor(pokemon.types.first?.color ?? .red)
+                    .foregroundColor(viewModel.currentPokemon!.types.first?.color ?? .red)
                 }
             }
             .padding()
         }
         .background(Color.white)
     }
-    
-    
-    
-    private func performAttack() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.3, blendDuration: 0)) {
-            showingAttackAnimation = true
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            showingAttackAnimation = false
-            if currentTurn == 1 {
-                pokemon2HP = max(0, pokemon2HP - (pokemon.stats[PokemonStatsType.attack] ?? 0))
-                currentTurn = 2
-            } else {
-                pokemon1HP = max(0, pokemon1HP - (randomPokemon.stats[PokemonStatsType.attack] ?? 0))
-                currentTurn = 1
-            }
-            if pokemon1HP == 0 || pokemon2HP == 0 {
-                finished = true
-            }
-        }
-    }
 }
-
+    
 struct PokemonStatusView: View {
     let pokemon: Pokemon
     let currentHP: Int
@@ -168,33 +186,4 @@ struct PokemonStatusView: View {
         default: return .red
         }
     }
-}
-
-#Preview {
-    PokemonFightView(pokemon: Pokemon(
-        id: 1,
-        name: "Bulbasaur",
-        image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png")!,
-        types: [.dark, .fire],  // Simplification de la syntaxe pour les types
-        hp: 50,
-        stats : [
-            .hp: 70,
-            .attack: 40,
-            .defense: 40,
-            .speed: 60
-        ]
-    ),
-     randomPokemon: Pokemon(
-        id: 2,
-        name: "Bulbasaur",
-        image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/50.png")!,
-        types: [.bug, .fighting],  // Simplification de la syntaxe pour les types
-        hp: 70,
-        stats : [
-            .hp: 70,
-            .attack: 20,
-            .defense: 50,
-            .speed: 30
-        ]
-    ))
 }
