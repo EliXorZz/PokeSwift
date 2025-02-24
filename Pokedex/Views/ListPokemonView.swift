@@ -21,18 +21,51 @@ struct ListPokemonView: View {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.filteredPokemons) { pokemon in
                     PokemonCard(pokemon: pokemon)
-                    .task {
-                        if (pokemon.id == viewModel.pokemons.last?.id) {
-                            await viewModel.loadPokemons()
+                        .task {
+                            if (pokemon.id == viewModel.filteredPokemons.last?.id) {
+                                await viewModel.loadPokemons()
+                            }
                         }
-                    }
-                    .onTapGesture { viewModel.showPokemonSheet(pokemon: pokemon) }
+                        .onTapGesture { viewModel.pokemonToShow = pokemon }
                 }
             }
             .padding()
         }
         .navigationBarTitle("Pokemon Collection")
-        .sheet(isPresented: $viewModel.showSheet){
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar{
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Picker("Tri", selection: $viewModel.orderType) {
+                        ForEach(OrderType.allCases, id: \.self) { type in
+                            Text(type.rawValue).tag(OrderType?.some(type))
+                        }
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Picker("Type", selection: $viewModel.filterType) {
+                      Text("Tous les types").tag(PokemonType?.none)
+                        
+                        ForEach(PokemonType.allCases, id: \.self) { type in
+                            Text(type.label).tag(PokemonType?.some(type))
+                        }
+                    }
+                } label: {
+                    Image(systemName: "line.horizontal.3.decrease.circle")
+                }
+            }
+        }
+        .sheet(
+            isPresented: Binding<Bool>(
+                get: { viewModel.pokemonToShow != nil },
+                set: { _ in viewModel.pokemonToShow = nil }
+            )
+        ){
             if let pokemon = viewModel.pokemonToShow {
                 PokemonDetailView(pokemon: pokemon)
             }

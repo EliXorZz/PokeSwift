@@ -7,7 +7,7 @@
 
 import SwiftUICore
 
-enum PokemonType: String, Codable {
+enum PokemonType: String, CaseIterable, Codable {
     case normal
     case fighting
     case flying
