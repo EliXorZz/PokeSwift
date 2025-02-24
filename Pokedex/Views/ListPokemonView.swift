@@ -11,9 +11,6 @@ import Kingfisher
 struct ListPokemonView: View {
     @StateObject private var viewModel = PokemonListViewModel()
     
-    @State var pokemonToShow: Pokemon? = nil
-    @State var showSheet = false
-    
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
@@ -23,36 +20,53 @@ struct ListPokemonView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.pokemons) { pokemon in
-                    HStack {
-                        KFImage(pokemon.image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 50, height: 50)
-                        
-                        Text(pokemon.name)
-                    }
+                    PokemonCard(pokemon: pokemon)
                     .task {
                         if (pokemon.id == viewModel.pokemons.last?.id) {
                             await viewModel.loadPokemons()
                         }
                     }
-                    .onTapGesture {
-                        pokemonToShow = pokemon
-                        showSheet.toggle()
-                    }
+                    .onTapGesture { viewModel.showPokemonSheet(pokemon: pokemon) }
                 }
             }
             .padding()
         }
         .navigationBarTitle("Pokemon Collection")
-        .sheet(isPresented: $showSheet, content: {
-            if let pokemon = pokemonToShow {
+        .sheet(isPresented: $viewModel.showSheet){
+            if let pokemon = viewModel.pokemonToShow {
                 PokemonDetailView(pokemon: pokemon)
             }
-        })
+        }
         .task {
             await viewModel.loadPokemons()
         }
+    }
+}
+
+struct PokemonCard: View {
+    let pokemon: Pokemon
+    
+    var body: some View {
+        VStack {
+            Text(pokemon.name.capitalized)
+                .foregroundStyle(.white)
+                .fontWeight(Font.Weight.bold)
+            
+            Spacer()
+                .frame(height: 10)
+            
+            KFImage(pokemon.image)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 100, height: 100)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 180)
+        .background(
+            LinearGradient(gradient: Gradient(colors: [pokemon.types.first?.color ?? .white, .white]), startPoint: .top, endPoint: .bottom)
+        )
+        .cornerRadius(10)
+        .shadow(radius: 3)
     }
 }
 

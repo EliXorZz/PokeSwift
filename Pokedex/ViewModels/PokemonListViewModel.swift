@@ -11,10 +11,18 @@ import CoreData
 class PokemonListViewModel: ObservableObject {
     @Published var pokemons: [Pokemon] = []
     
+    @Published var showSheet = false
+    @Published var pokemonToShow: Pokemon? = nil
+    
     private let pokemonRepository = PokemonRepository()
     
     private let limit = 20
     private var currentPage = 0
+    
+    func showPokemonSheet(pokemon: Pokemon) {
+        pokemonToShow = pokemon
+        showSheet = true
+    }
     
     func loadPokemons() async {
         do {
