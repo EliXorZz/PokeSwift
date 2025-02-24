@@ -15,6 +15,7 @@ struct PokemonFightView: View {
     @State private var pokemon2HP: Int
     @State private var showingAttackAnimation = false
     @State private var currentTurn = 1 // 1 pour pokemon, 2 pour randomPokemon
+    @Environment(\.dismiss) private var dismiss
     @State private var finished = false
     
     init(pokemon: Pokemon, randomPokemon: Pokemon) {
@@ -91,7 +92,7 @@ struct PokemonFightView: View {
                 
                 if !finished {
                     Button("Fuir") {
-                        // Action pour fuir
+                        finished = true
                     }
                     .font(.title3)
                     .foregroundColor(.gray)
@@ -99,7 +100,7 @@ struct PokemonFightView: View {
                 }
                 else {
                     Button("Partir") {
-                        // Action pour fuir
+                        dismiss()
                     }
                     .font(.title3)
                     .foregroundColor(pokemon.types.first?.color ?? .red)

@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct PokemonDetailView: View {
+    @StateObject private var viewModel = PokemonDetailViewModel()
     let pokemon: Pokemon
     @Environment(\.dismiss) private var dismiss
-    @State private var isFavorite = false
-    @State private var showingFightView = false
+    
     
     private var backgroundColor: Color {
         return pokemon.types.first?.color.opacity(0.2) ?? .clear
@@ -23,11 +23,11 @@ struct PokemonDetailView: View {
                 // Header avec boutons
                 HStack {
                     Button(action: {
-                        isFavorite.toggle()
+                        viewModel.isFavorite.toggle()
                     }) {
-                        Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        Image(systemName: viewModel.isFavorite ? "heart.fill" : "heart")
                             .font(.title2)
-                            .foregroundColor(isFavorite ? .red : .gray)
+                            .foregroundColor(viewModel.isFavorite ? .red : .gray)
                     }
                     
                     Spacer()
@@ -86,7 +86,10 @@ struct PokemonDetailView: View {
                 
                 // Bouton Combat
                 Button(action: {
-                    showingFightView = true
+                    viewModel.showingFightView = true
+                    Task {
+                        await viewModel.loadRandomPokemon()
+                    }
                 }) {
                     Text("Commencer le combat")
                         .font(.headline)
@@ -106,25 +109,16 @@ struct PokemonDetailView: View {
                 .padding(.top, 20)
             }
             .padding(.vertical)
-            .sheet(isPresented: $showingFightView) {
-                        PokemonFightView(
-                            pokemon: pokemon,
-                            randomPokemon: Pokemon(
-                                id: 2,
-                                name: "Bulbasaur",
-                                image: URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/50.png")!,
-                                types: [.bug, .fighting],
-                                hp: 70,
-                                stats : [
-                                    .hp: 70,
-                                    .attack: 20,
-                                    .defense: 50,
-                                    .speed: 30
-                                ]
-                                
-                            )
-                        )
-                    }
+            .sheet(isPresented: $viewModel.showingFightView) {
+                if (viewModel.randPokemon != nil) {
+                    PokemonFightView(
+                        pokemon: pokemon,
+                        randomPokemon: viewModel.randPokemon!
+                    )
+                } else {
+                    ProgressView()
+                }
+            }
         }
         .background(backgroundColor)
         .navigationBarHidden(true)
