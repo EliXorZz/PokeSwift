@@ -40,7 +40,7 @@ class PokemonRepository {
             name: pokemon.name,
             image: URL(string: pokemon.sprites.other.official.frontDefault)!,
             
-            types: [],
+            types: pokemon.types.map(\.type.name),
             
             hp: stats[PokemonStatsType.hp] ?? 0,
             

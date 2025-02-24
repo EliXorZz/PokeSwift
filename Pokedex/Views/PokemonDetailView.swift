@@ -14,7 +14,7 @@ struct PokemonDetailView: View {
     @State private var showingFightView = false
     
     private var backgroundColor: Color {
-        pokemon.types.first?.color.opacity(0.2) ?? .clear
+        return pokemon.types.first?.color.opacity(0.2) ?? .clear
     }
     
     var body: some View {
